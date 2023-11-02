@@ -31,12 +31,12 @@ def create_cart(access_token,refresh_token):
         "cart_order_data": [
             {
                 "name": "agent_id",
-                "value": "s9-test2.deA.9627",
+                "value": "s9-02-11-2023.deA.1390",
                 "type": "string"
             },
             {
                 "name": "agent_name",
-                "value": "s9-test2",
+                "value": "s9-02-11-2023",
                 "type": "string"
             }
         ],
@@ -60,7 +60,7 @@ def create_cart(access_token,refresh_token):
     try:
         response = requests.post(url, json=payload, headers = headers)
         api_response = response.json()
-        print(api_response)
+        #print(api_response)
         return api_response
     except (requests.Timeout, requests.ConnectionError, requests.HTTPError) as err:
         print("Error while trying to GET data")
@@ -73,13 +73,10 @@ def create_cart(access_token,refresh_token):
 def poll_cart_status(cart_id):
     response = get_tokens(sys.argv[1])
     access_token = response['access_token']
-    print("***** Inside poll_cart_status *******")
+    #print("***** Inside poll_cart_status *******")
     #auth_token = access_token
     url = 'https://eu-de.schematics.cloud.ibm.com/v2/cart/'+cart_id
-    #url = sys.argv[1]
-    #auth_token = sys.argv[2]
-    #auth_token = "eyJraWQiOiIyMDIzMDkwODA4MzQiLCJhbGciOiJSUzI1NiJ9.eyJpYW1faWQiOiJJQk1pZC01NTAwMDQ4WVFYIiwiaWQiOiJJQk1pZC01NTAwMDQ4WVFYIiwicmVhbG1pZCI6IklCTWlkIiwianRpIjoiZGEyYTFlMzYtYjEwMC00ZTczLTgzOGEtYWQ4MzVjOTdkNjY3IiwiaWRlbnRpZmllciI6IjU1MDAwNDhZUVgiLCJnaXZlbl9uYW1lIjoiVW1hciBBbGkiLCJmYW1pbHlfbmFtZSI6Ik5hZ29vciBTYWhlYiBTaGFpayIsIm5hbWUiOiJVbWFyIEFsaSBOYWdvb3IgU2FoZWIgU2hhaWsiLCJlbWFpbCI6InVtYXJhbGkubmFnb29yQGluLmlibS5jb20iLCJzdWIiOiJ1bWFyYWxpLm5hZ29vckBpbi5pYm0uY29tIiwiYXV0aG4iOnsic3ViIjoidW1hcmFsaS5uYWdvb3JAaW4uaWJtLmNvbSIsImlhbV9pZCI6IklCTWlkLTU1MDAwNDhZUVgiLCJuYW1lIjoiVW1hciBBbGkgTmFnb29yIFNhaGViIFNoYWlrIiwiZ2l2ZW5fbmFtZSI6IlVtYXIgQWxpIiwiZmFtaWx5X25hbWUiOiJOYWdvb3IgU2FoZWIgU2hhaWsiLCJlbWFpbCI6InVtYXJhbGkubmFnb29yQGluLmlibS5jb20ifSwiYWNjb3VudCI6eyJ2YWxpZCI6dHJ1ZSwiYnNzIjoiZmNkYjc2NDEwMjE1NGM3ZWE4ZTFiNzlkM2E2NGFmZTAiLCJpbXNfdXNlcl9pZCI6Ijc3ODk3NDYiLCJmcm96ZW4iOnRydWUsImltcyI6IjE5ODI5MTIifSwiaWF0IjoxNjk2ODM3MTM1LCJleHAiOjE2OTY4NDA3MzUsImlzcyI6Imh0dHBzOi8vaWFtLmNsb3VkLmlibS5jb20vaWRlbnRpdHkiLCJncmFudF90eXBlIjoidXJuOmlibTpwYXJhbXM6b2F1dGg6Z3JhbnQtdHlwZTphcGlrZXkiLCJzY29wZSI6ImlibSBvcGVuaWQiLCJjbGllbnRfaWQiOiJieCIsImFjciI6NCwiYW1yIjpbIm1mYSIsInB3ZCIsImh3ayJdfQ.JWO2jyK_GrgJHyCCALcInpMzog6Ik4YvxBJFmZnWuCCdlEzJmFcgJOnb3qMZcsiaeE5bWhIROZFxTUVFTfwsQHxMwcbzyu4C400k_m4vbTBHlAFCg-7j_smr7WTvLXpLnJyOiwAKSmYFock8bmPrTIjfDTyEzfyWAYjD-5pVDFuwX3fsPJge86Dc4V_5k5StEI96ViYrZyJWY9IM94CE-tEIsjppmDcXQN3J-HmWFr1y72wlgMSvMYG2V5fvFwS7HdjHzUaRNPX7JNMq4FnsXD1cA5oQ7Vh9ZJYTxUs34atl00DVli8c_qpOTNE0f7wtFVLFAtCjcR75hd5QViDJMA"
-
+    
     # # Header
     headers = { 'Authorization': 'Bearer '+access_token, 'X-Feature-Agents': 'True'}
 
@@ -93,11 +90,34 @@ def poll_cart_status(cart_id):
         request.close()
 
     jsonResponse = request.json()
-    # #print(request.json().user_state.state)
+    #print("******* Workspace ID *******")
+    ws_id = jsonResponse['cart_items'][0]['itemSKU']['sku_id']
+    #print(ws_id)
+
+    ########################## Start : Get Workspace status #########################
+    ws_url = 'https://eu-de.schematics.cloud.ibm.com/v1/workspaces/'+ws_id
+    # # Header
+    ws_headers = { 'Authorization': 'Bearer '+access_token}
+    # # Posting data
+    try:
+        ws_response = requests.get(ws_url, headers = ws_headers)
+    except (requests.Timeout, requests.ConnectionError, requests.HTTPError) as err:
+        print("Error while trying to GET ws data")
+        print(err)
+    finally:
+        ws_response.close()
+    
+    ws_jsonResponse = ws_response.json()
+    print("****** WS Status *******")
+    print(ws_jsonResponse['status'])
+
+    ########################## End : Get Workspace status #########################
+
 
     for key, value in jsonResponse.items():
         if key == 'user_state':
             ts = time.time()
+            print('******* Cart Status ******')
             print('Current Timestamp',ts)
             print(key, ":", value)
 
@@ -111,13 +131,13 @@ if __name__ == '__main__':
     access_token = response['access_token']
     refresh_token = response['refresh_token']
 
-    print(response['access_token'])
+    #print(response['access_token'])
 
     # STEP-2: Create Cart
     cart_response = create_cart(access_token,refresh_token)
 
     cart_id = cart_response['_id']
-    print("Cart ID: ",cart_id)
+    #print("Cart ID: ",cart_id)
 
     # STEP-3: Poll for cart status using cart id
     sched = scheduler()
